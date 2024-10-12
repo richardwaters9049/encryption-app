@@ -1,6 +1,10 @@
-"use client"
+"use client"; // Indicate this component uses client-side rendering
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { Button } from '@/components/ui/button'; // Adjust the path as necessary
+import { Input } from '@/components/ui/input'; // Adjust the path as necessary
+import { Toaster } from '@/components/ui/toaster'; // Import the Toaster component
+import { toast } from '@/hooks/use-toast';
 
 export default function Home() {
   const [message, setMessage] = useState('');
@@ -11,6 +15,7 @@ export default function Home() {
   const [decryptedMessage, setDecryptedMessage] = useState('');
   const [error, setError] = useState('');
   const [showDecryption, setShowDecryption] = useState(false);
+  const decryptionRef = useRef<HTMLDivElement>(null); // Create a ref for the decryption section
 
   const handleEncrypt = async () => {
     try {
@@ -29,6 +34,9 @@ export default function Home() {
         setTag(data.tag);
         setShowDecryption(true); // Show decryption section
         setError('');
+
+        // Scroll to the decryption section
+        decryptionRef.current?.scrollIntoView({ behavior: 'smooth' });
       } else {
         setError(data.error);
       }
@@ -75,11 +83,21 @@ export default function Home() {
     setShowDecryption(false); // Hide decryption section
   };
 
-  return (
-    <div className=" flex flex-col items-center justify-center p-4 gap-3">
-      <h1 className="text-4xl font-bold">AES Encryption & Decryption App</h1>
+  // Function to copy text to clipboard
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      toast({ title: `${label} copied to clipboard!`, duration: 2000 });
+    }).catch(() => {
+      toast({ title: 'Failed to copy!', duration: 2000 });
+    });
+  };
 
-      <p className="text-lg text-center p-6 w-1/2">
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center p-4">
+      <Toaster /> {/* Add Toaster component here */}
+      <h1 className="text-4xl font-bold mb-6">AES Encryption & Decryption App</h1>
+
+      <p className="mb-6 text-center">
         This application allows you to encrypt and decrypt messages using AES encryption, a widely used
         cryptographic standard. It showcases how encryption protects sensitive data, a critical aspect of
         cybersecurity. You can use this app to understand basic encryption concepts and test your
@@ -88,37 +106,50 @@ export default function Home() {
 
       <h2 className="text-lg font-bold mb-2">Example Data for Testing:</h2>
       <p className="mb-4">
-        Message: <strong>Hello, World!</strong><br />
-        Key: <strong>thisisasecretkey</strong>
+        Message:
+        <span
+          className="text-blue-500 cursor-pointer hover:underline"
+          onClick={() => copyToClipboard("Hello, World!", "Message")}
+        >
+          <strong>Hello, World!</strong>
+        </span>
+        <br />
+        Key:
+        <span
+          className="text-blue-500 cursor-pointer hover:underline"
+          onClick={() => copyToClipboard("thisisasecretkey", "Key")}
+        >
+          <strong>thisisasecretkey</strong>
+        </span>
       </p>
 
       <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-lg">
         {/* Encryption Form */}
-        <input
+        <Input
           type="text"
           placeholder="Message"
-          className="w-full p-2 mb-4 border rounded"
+          className="mb-4"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
         />
-        <input
+        <Input
           type="text"
           placeholder="Key (16, 24, or 32 characters)"
-          className="w-full p-2 mb-4 border rounded"
+          className="mb-4"
           value={key}
           onChange={(e) => setKey(e.target.value)}
         />
-        <button
+        <Button
           onClick={handleEncrypt}
           className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-700"
         >
           Encrypt
-        </button>
+        </Button>
 
         {error && <p className="text-red-500 mt-4">{error}</p>}
 
         {showDecryption && (
-          <div className="mt-6">
+          <div ref={decryptionRef} className="mt-6">
             <h3 className="text-lg font-bold">Encryption Result:</h3>
             <p><strong>Nonce:</strong> {nonce}</p>
             <p><strong>Ciphertext:</strong> {ciphertext}</p>
@@ -126,40 +157,40 @@ export default function Home() {
 
             {/* Decryption Form */}
             <h2 className="text-2xl font-bold mt-8">Decrypt a Message</h2>
-            <input
+            <Input
               type="text"
               placeholder="Ciphertext"
-              className="w-full p-2 mb-4 border rounded"
+              className="mb-4"
               value={ciphertext}
               onChange={(e) => setCiphertext(e.target.value)}
             />
-            <input
+            <Input
               type="text"
               placeholder="Nonce"
-              className="w-full p-2 mb-4 border rounded"
+              className="mb-4"
               value={nonce}
               onChange={(e) => setNonce(e.target.value)}
             />
-            <input
+            <Input
               type="text"
               placeholder="Tag"
-              className="w-full p-2 mb-4 border rounded"
+              className="mb-4"
               value={tag}
               onChange={(e) => setTag(e.target.value)}
             />
-            <input
+            <Input
               type="text"
               placeholder="Key (16, 24, or 32 characters)"
-              className="w-full p-2 mb-4 border rounded"
+              className="mb-4"
               value={key}
               onChange={(e) => setKey(e.target.value)}
             />
-            <button
+            <Button
               onClick={handleDecrypt}
               className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-700"
             >
               Decrypt
-            </button>
+            </Button>
 
             {decryptedMessage && (
               <div className="mt-6">
@@ -169,12 +200,12 @@ export default function Home() {
             )}
 
             {/* Refresh Button */}
-            <button
+            <Button
               onClick={handleReset}
               className="mt-4 w-full bg-gray-500 text-white py-2 rounded hover:bg-gray-700"
             >
               Refresh
-            </button>
+            </Button>
           </div>
         )}
       </div>
