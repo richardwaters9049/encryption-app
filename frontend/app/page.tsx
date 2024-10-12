@@ -22,7 +22,7 @@ export default function Home() {
 
   const handleEncrypt = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/encrypt`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/encrypt`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -48,17 +48,12 @@ export default function Home() {
 
   const handleDecrypt = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/decrypt`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/decrypt`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ciphertext,
-          key,
-          nonce,
-          tag,
-        }),
+        body: JSON.stringify({ ciphertext, key, nonce, tag }),
       });
 
       const data = await response.json();
@@ -114,27 +109,18 @@ export default function Home() {
       <h1 className="text-4xl font-bold mb-6">AES Encryption & Decryption App</h1>
 
       <p className="mb-4 text-center w-1/2 text-lg">
-        This application allows you to encrypt and decrypt messages using AES encryption, a widely used
-        cryptographic standard. It showcases how encryption protects sensitive data, a critical aspect of
-        cybersecurity. You can use this app to understand basic encryption concepts and test your
-        messages with dummy data.
+        This application allows you to encrypt and decrypt messages using AES encryption.
       </p>
 
       <h2 className="text-lg font-bold mb-2">Click on the following buttons to copy this data for testing:</h2>
       <p className="mb-2">
         Message:
-        <span
-          className="text-blue-500 cursor-pointer hover:underline px-2"
-          onClick={() => copyToClipboard("Hello, World!", "Message")}
-        >
+        <span className="text-blue-500 cursor-pointer hover:underline px-2" onClick={() => copyToClipboard("Hello, World!", "Message")}>
           <strong>Hello, World!</strong>
         </span>
         <br />
         Key:
-        <span
-          className="text-blue-500 cursor-pointer hover:underline px-2"
-          onClick={() => copyToClipboard("thisisasecretkey", "Key")}
-        >
+        <span className="text-blue-500 cursor-pointer hover:underline px-2" onClick={() => copyToClipboard("thisisasecretkey", "Key")}>
           <strong>thisisasecretkey</strong>
         </span>
       </p>
@@ -154,10 +140,7 @@ export default function Home() {
           value={key}
           onChange={(e) => setKey(e.target.value)}
         />
-        <Button
-          onClick={handleEncrypt}
-          className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-700"
-        >
+        <Button onClick={handleEncrypt} className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-700">
           Encrypt
         </Button>
 
@@ -199,10 +182,7 @@ export default function Home() {
               value={key}
               onChange={(e) => setKey(e.target.value)}
             />
-            <Button
-              onClick={handleDecrypt}
-              className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-700"
-            >
+            <Button onClick={handleDecrypt} className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-700">
               Decrypt
             </Button>
 
@@ -214,11 +194,7 @@ export default function Home() {
             )}
 
             {decryptionSuccessful && (
-              <Button
-                ref={refreshButtonRef}
-                onClick={handleReset}
-                className="mt-4 w-full bg-gray-500 text-white py-2 rounded hover:bg-gray-700"
-              >
+              <Button ref={refreshButtonRef} onClick={handleReset} className="mt-4 w-full bg-gray-500 text-white py-2 rounded hover:bg-gray-700">
                 Refresh
               </Button>
             )}
