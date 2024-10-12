@@ -19,11 +19,16 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"],
+      "@/*": ["./frontend/*"],
       "@/components/*": ["./frontend/components/ui/*"],
-      "@/hooks/*": ["./hooks/*"]
+      "@/hooks/*": ["./frontend/hooks/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": [
+    "next-env.d.ts",
+    "frontend/**/*.ts",
+    "frontend/**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
   "exclude": ["node_modules"]
 }
