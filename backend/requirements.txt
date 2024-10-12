@@ -11,5 +11,3 @@ pytz==2023.3.post1
 requests==2.31.0
 SQLAlchemy==2.0.29
 tensorflow==2.17.0
-tensorflow-macos==2.15.0  # Only if you need TensorFlow on macOS
-# Add any other core dependencies that you directly import in your application.
