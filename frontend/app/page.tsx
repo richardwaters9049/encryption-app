@@ -1,6 +1,6 @@
 "use client"; // Indicate this component uses client-side rendering
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button'; // Adjust the path as necessary
 import { Input } from '@/components/ui/input'; // Adjust the path as necessary
 import { Toaster } from '@/components/ui/toaster'; // Import the Toaster component
@@ -15,7 +15,11 @@ export default function Home() {
   const [decryptedMessage, setDecryptedMessage] = useState('');
   const [error, setError] = useState('');
   const [showDecryption, setShowDecryption] = useState(false);
-  const decryptionRef = useRef<HTMLDivElement>(null); // Create a ref for the decryption section
+  const [decryptionSuccessful, setDecryptionSuccessful] = useState(false); // State to track decryption success
+
+  // Create refs for the decryption section and refresh button
+  const decryptionRef = useRef<HTMLDivElement>(null); // Decryption section ref
+  const refreshButtonRef = useRef<HTMLButtonElement>(null); // Refresh button ref
 
   const handleEncrypt = async () => {
     try {
@@ -34,9 +38,7 @@ export default function Home() {
         setTag(data.tag);
         setShowDecryption(true); // Show decryption section
         setError('');
-
-        // Scroll to the decryption section
-        decryptionRef.current?.scrollIntoView({ behavior: 'smooth' });
+        setDecryptionSuccessful(false); // Reset decryption success state
       } else {
         setError(data.error);
       }
@@ -64,8 +66,12 @@ export default function Home() {
       if (response.ok) {
         setDecryptedMessage(data.message);
         setError('');
+        setDecryptionSuccessful(true); // Mark decryption as successful
+        // Scroll to the refresh button after successful decryption
+        refreshButtonRef.current?.scrollIntoView({ behavior: 'smooth' });
       } else {
         setError(data.error);
+        setDecryptionSuccessful(false); // Reset on error
       }
     } catch (err) {
       setError('Failed to communicate with the server');
@@ -81,6 +87,7 @@ export default function Home() {
     setDecryptedMessage('');
     setError('');
     setShowDecryption(false); // Hide decryption section
+    setDecryptionSuccessful(false); // Reset decryption success state
   };
 
   // Function to copy text to clipboard
@@ -92,23 +99,37 @@ export default function Home() {
     });
   };
 
+  // Scroll to decryption section when it is shown
+  useEffect(() => {
+    if (showDecryption && decryptionRef.current) {
+      decryptionRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [showDecryption]); // Trigger when showDecryption changes
+
+  // Scroll to refresh button after successful decryption
+  useEffect(() => {
+    if (decryptionSuccessful && refreshButtonRef.current) {
+      refreshButtonRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [decryptionSuccessful]); // Trigger when decryptionSuccessful changes
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 tracking-widest gap-4">
       <Toaster /> {/* Add Toaster component here */}
       <h1 className="text-4xl font-bold mb-6">AES Encryption & Decryption App</h1>
 
-      <p className="mb-6 text-center">
+      <p className="mb-4 text-center w-1/2 text-lg">
         This application allows you to encrypt and decrypt messages using AES encryption, a widely used
         cryptographic standard. It showcases how encryption protects sensitive data, a critical aspect of
         cybersecurity. You can use this app to understand basic encryption concepts and test your
         messages with dummy data.
       </p>
 
-      <h2 className="text-lg font-bold mb-2">Example Data for Testing:</h2>
-      <p className="mb-4">
+      <h2 className="text-lg font-bold mb-2">Click on the following buttons to copy this data for testing:</h2>
+      <p className="mb-2">
         Message:
         <span
-          className="text-blue-500 cursor-pointer hover:underline"
+          className="text-blue-500 cursor-pointer hover:underline px-2"
           onClick={() => copyToClipboard("Hello, World!", "Message")}
         >
           <strong>Hello, World!</strong>
@@ -116,14 +137,14 @@ export default function Home() {
         <br />
         Key:
         <span
-          className="text-blue-500 cursor-pointer hover:underline"
+          className="text-blue-500 cursor-pointer hover:underline px-2"
           onClick={() => copyToClipboard("thisisasecretkey", "Key")}
         >
           <strong>thisisasecretkey</strong>
         </span>
       </p>
 
-      <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-lg">
+      <div className="w-1/2 p-6 bg-white rounded-lg shadow-lg">
         {/* Encryption Form */}
         <Input
           type="text"
@@ -149,7 +170,7 @@ export default function Home() {
         {error && <p className="text-red-500 mt-4">{error}</p>}
 
         {showDecryption && (
-          <div ref={decryptionRef} className="mt-6">
+          <div ref={decryptionRef} className="mt-6 flex flex-col gap-4">
             <h3 className="text-lg font-bold">Encryption Result:</h3>
             <p><strong>Nonce:</strong> {nonce}</p>
             <p><strong>Ciphertext:</strong> {ciphertext}</p>
@@ -159,17 +180,17 @@ export default function Home() {
             <h2 className="text-2xl font-bold mt-8">Decrypt a Message</h2>
             <Input
               type="text"
-              placeholder="Ciphertext"
-              className="mb-4"
-              value={ciphertext}
-              onChange={(e) => setCiphertext(e.target.value)}
-            />
-            <Input
-              type="text"
               placeholder="Nonce"
               className="mb-4"
               value={nonce}
               onChange={(e) => setNonce(e.target.value)}
+            />
+            <Input
+              type="text"
+              placeholder="Ciphertext"
+              className="mb-4"
+              value={ciphertext}
+              onChange={(e) => setCiphertext(e.target.value)}
             />
             <Input
               type="text"
@@ -193,19 +214,22 @@ export default function Home() {
             </Button>
 
             {decryptedMessage && (
-              <div className="mt-6">
-                <h3 className="text-lg font-bold">Decryption Result:</h3>
+              <div className="mt-6 flex flex-col gap-4">
+                <h3 className="text-lg font-bold">Decryption Result</h3>
                 <p><strong>Decrypted Message:</strong> {decryptedMessage}</p>
               </div>
             )}
 
             {/* Refresh Button */}
-            <Button
-              onClick={handleReset}
-              className="mt-4 w-full bg-gray-500 text-white py-2 rounded hover:bg-gray-700"
-            >
-              Refresh
-            </Button>
+            {decryptionSuccessful && ( // Only show the refresh button if decryption was successful
+              <Button
+                ref={refreshButtonRef} // Attach ref to the refresh button
+                onClick={handleReset}
+                className="mt-4 w-full bg-gray-500 text-white py-2 rounded hover:bg-gray-700"
+              >
+                Refresh
+              </Button>
+            )}
           </div>
         )}
       </div>
