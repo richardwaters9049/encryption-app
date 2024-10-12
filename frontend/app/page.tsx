@@ -1,10 +1,10 @@
 "use client"; // Indicate this component uses client-side rendering
 
 import { useState, useRef, useEffect } from 'react';
-import { Button } from '@/components/ui/button'; // Adjust the path as necessary
-import { Input } from '@/components/ui/input'; // Adjust the path as necessary
-import { Toaster } from '@/components/ui/toaster'; // Import the Toaster component
-import { toast } from '@/hooks/use-toast';
+import { Button } from '../components/ui/button'; // Adjust the path as necessary
+import { Input } from '../components/ui/input'; // Adjust the path as necessary
+import { Toaster } from '../components/ui/toaster'; // Import the Toaster component
+import { toast } from '../hooks/use-toast';
 
 export default function Home() {
   const [message, setMessage] = useState('');
