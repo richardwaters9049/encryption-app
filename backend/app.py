@@ -12,6 +12,7 @@ def encrypt():
     try:
         data = request.json
 
+        # Validate request data
         if not data or "message" not in data or "key" not in data:
             return (
                 jsonify(
@@ -25,6 +26,7 @@ def encrypt():
         message = data["message"].encode("utf-8")
         key = data["key"].encode("utf-8")
 
+        # Validate key length
         if len(key) not in [16, 24, 32]:
             return (
                 jsonify(
@@ -35,6 +37,7 @@ def encrypt():
                 400,
             )
 
+        # Encrypt the message
         nonce, ciphertext, tag = encrypt_message(message, key)
         return jsonify(
             {"nonce": nonce.hex(), "ciphertext": ciphertext.hex(), "tag": tag.hex()}
@@ -49,6 +52,7 @@ def decrypt():
     try:
         data = request.json
 
+        # Validate request data
         if (
             not data
             or "ciphertext" not in data
@@ -65,11 +69,13 @@ def decrypt():
                 400,
             )
 
+        # Decode request data
         ciphertext = bytes.fromhex(data["ciphertext"])
         key = data["key"].encode("utf-8")
         nonce = bytes.fromhex(data["nonce"])
         tag = bytes.fromhex(data["tag"])
 
+        # Validate key length
         if len(key) not in [16, 24, 32]:
             return (
                 jsonify(
@@ -80,6 +86,7 @@ def decrypt():
                 400,
             )
 
+        # Decrypt the message
         decrypted_message = decrypt_message(ciphertext, key, nonce, tag)
         return jsonify({"message": decrypted_message.decode("utf-8")})
     except Exception as e:

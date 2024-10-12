@@ -15,15 +15,18 @@ export default function Home() {
   const [decryptedMessage, setDecryptedMessage] = useState('');
   const [error, setError] = useState('');
   const [showDecryption, setShowDecryption] = useState(false);
-  const [decryptionSuccessful, setDecryptionSuccessful] = useState(false); // State to track decryption success
+  const [decryptionSuccessful, setDecryptionSuccessful] = useState(false);
 
   // Create refs for the decryption section and refresh button
-  const decryptionRef = useRef<HTMLDivElement>(null); // Decryption section ref
-  const refreshButtonRef = useRef<HTMLButtonElement>(null); // Refresh button ref
+  const decryptionRef = useRef<HTMLDivElement>(null);
+  const refreshButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Base URL for API - you can change this to your deployed URL
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001';
 
   const handleEncrypt = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:5001/encrypt', {
+      const response = await fetch(`${API_URL}/encrypt`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -36,9 +39,9 @@ export default function Home() {
         setNonce(data.nonce);
         setCiphertext(data.ciphertext);
         setTag(data.tag);
-        setShowDecryption(true); // Show decryption section
+        setShowDecryption(true);
         setError('');
-        setDecryptionSuccessful(false); // Reset decryption success state
+        setDecryptionSuccessful(false);
       } else {
         setError(data.error);
       }
@@ -49,7 +52,7 @@ export default function Home() {
 
   const handleDecrypt = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:5001/decrypt', {
+      const response = await fetch(`${API_URL}/decrypt`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -66,12 +69,11 @@ export default function Home() {
       if (response.ok) {
         setDecryptedMessage(data.message);
         setError('');
-        setDecryptionSuccessful(true); // Mark decryption as successful
-        // Scroll to the refresh button after successful decryption
+        setDecryptionSuccessful(true);
         refreshButtonRef.current?.scrollIntoView({ behavior: 'smooth' });
       } else {
         setError(data.error);
-        setDecryptionSuccessful(false); // Reset on error
+        setDecryptionSuccessful(false);
       }
     } catch (err) {
       setError('Failed to communicate with the server');
@@ -86,11 +88,10 @@ export default function Home() {
     setTag('');
     setDecryptedMessage('');
     setError('');
-    setShowDecryption(false); // Hide decryption section
-    setDecryptionSuccessful(false); // Reset decryption success state
+    setShowDecryption(false);
+    setDecryptionSuccessful(false);
   };
 
-  // Function to copy text to clipboard
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text).then(() => {
       toast({ title: `${label} copied to clipboard!`, duration: 2000 });
@@ -99,23 +100,21 @@ export default function Home() {
     });
   };
 
-  // Scroll to decryption section when it is shown
   useEffect(() => {
     if (showDecryption && decryptionRef.current) {
       decryptionRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [showDecryption]); // Trigger when showDecryption changes
+  }, [showDecryption]);
 
-  // Scroll to refresh button after successful decryption
   useEffect(() => {
     if (decryptionSuccessful && refreshButtonRef.current) {
       refreshButtonRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [decryptionSuccessful]); // Trigger when decryptionSuccessful changes
+  }, [decryptionSuccessful]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 tracking-widest gap-4">
-      <Toaster /> {/* Add Toaster component here */}
+      <Toaster />
       <h1 className="text-4xl font-bold mb-6">AES Encryption & Decryption App</h1>
 
       <p className="mb-4 text-center w-1/2 text-lg">
@@ -145,7 +144,6 @@ export default function Home() {
       </p>
 
       <div className="w-1/2 p-6 bg-white rounded-lg shadow-lg">
-        {/* Encryption Form */}
         <Input
           type="text"
           placeholder="Message"
@@ -176,7 +174,6 @@ export default function Home() {
             <p><strong>Ciphertext:</strong> {ciphertext}</p>
             <p><strong>Tag:</strong> {tag}</p>
 
-            {/* Decryption Form */}
             <h2 className="text-2xl font-bold mt-8">Decrypt a Message</h2>
             <Input
               type="text"
@@ -220,10 +217,9 @@ export default function Home() {
               </div>
             )}
 
-            {/* Refresh Button */}
-            {decryptionSuccessful && ( // Only show the refresh button if decryption was successful
+            {decryptionSuccessful && (
               <Button
-                ref={refreshButtonRef} // Attach ref to the refresh button
+                ref={refreshButtonRef}
                 onClick={handleReset}
                 className="mt-4 w-full bg-gray-500 text-white py-2 rounded hover:bg-gray-700"
               >
