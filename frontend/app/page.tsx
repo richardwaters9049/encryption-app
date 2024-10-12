@@ -17,16 +17,12 @@ export default function Home() {
   const [showDecryption, setShowDecryption] = useState(false);
   const [decryptionSuccessful, setDecryptionSuccessful] = useState(false);
 
-  // Create refs for the decryption section and refresh button
   const decryptionRef = useRef<HTMLDivElement>(null);
   const refreshButtonRef = useRef<HTMLButtonElement>(null);
 
-  // Base URL for API - you can change this to your deployed URL
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001';
-
   const handleEncrypt = async () => {
     try {
-      const response = await fetch(`${API_URL}/encrypt`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/encrypt`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -52,7 +48,7 @@ export default function Home() {
 
   const handleDecrypt = async () => {
     try {
-      const response = await fetch(`${API_URL}/decrypt`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/decrypt`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
